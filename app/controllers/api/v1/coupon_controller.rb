@@ -1,6 +1,6 @@
 module Api
 	module V1
-    class CartController < ApplicationController
+    class CouponController < ApplicationController
       def add
         token = get_token
         user = find_cart(token)
