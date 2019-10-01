@@ -1,8 +1,7 @@
 module Api
-	module V1
+  module V1
     class CouponController < ApplicationController
       def add
-        token = get_token
         user = find_cart(token)
         coupon = user.coupons.create(coupon_params)
         service = CartService.new(user)
@@ -10,7 +9,6 @@ module Api
       end
 
       def delete
-        token = get_token
         user = find_cart(token)
         coupon = user.coupons.find(params[:id])
         coupon.destroy
@@ -18,19 +16,19 @@ module Api
       end
 
       private
-      def get_token
-        request.headers['Authorization']
-      end
 
-      def coupon_params
-        params.require(:coupon).permit(:name)
-      end
+        def token
+          request.headers['Authorization']
+        end
 
-      def find_cart(token)
-        user = User.find_by user_token: token
-        user
-      end
+        def coupon_params
+          params.require(:coupon).permit(:name)
+        end
 
+        def find_cart(token)
+          user = User.find_by user_token: token
+          user
+        end
     end
   end
 end
