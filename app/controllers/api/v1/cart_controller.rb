@@ -4,9 +4,8 @@ module Api
 	module V1
         class CartController < ApplicationController
             def update
-                token = get_token
-                user = find_cart(token)
-                user ||= create_cart(token)
+                user = find_cart(get_token)
+                user ||= create_cart(get_token)
                 user.update(cart_params)
                 service = CartService.new(user)
                 render json: service.get_checkout
@@ -14,6 +13,7 @@ module Api
 
             def checkout
                 user = find_cart(get_token)
+                user ||= create_cart(get_token)
                 service = CartService.new(user)
                 render json: service.get_checkout
             end
