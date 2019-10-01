@@ -3,8 +3,8 @@ Rails.application.routes.draw do
   	namespace 'v1' do
       patch 'cart/' => 'cart#update'
       get 'cart/' => 'cart#checkout'
-      post 'coupon/' => 'coupons#add'
-      delete 'coupon/:id' => 'coupons#delete'
+      post 'coupon/' => 'coupon#add'
+      delete 'coupon/:id' => 'coupon#delete'
     end
   end
 end
