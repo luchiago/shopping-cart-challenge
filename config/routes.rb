@@ -1,3 +1,6 @@
 Rails.application.routes.draw do
-  # For details on the DSL available within this file, see https://guides.rubyonrails.org/routing.html
+  patch 'cart/' => 'cart#update'
+  get 'cart/' => 'cart#checkout'
+  post 'coupon/' => 'coupons#add'
+  delete 'coupon/:id' => 'coupons#delete'
 end
