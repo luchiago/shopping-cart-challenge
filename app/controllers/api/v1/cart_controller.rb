@@ -1,5 +1,3 @@
-# require '.services/cart_service.rb'
-
 module Api
 	module V1
         class CartController < ApplicationController
