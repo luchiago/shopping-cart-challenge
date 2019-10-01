@@ -1,0 +1,13 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  user_token: MyString
+  apple: 1
+  banana: 1
+  orange: 1
+
+two:
+  user_token: MyString
+  apple: 1
+  banana: 1
+  orange: 1
