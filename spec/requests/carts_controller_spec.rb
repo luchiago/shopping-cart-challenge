@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-describe 'PATCH #update', type: :request do
+RSpec.describe 'PATCH cart#update', type: :request do
   let(:expect_values) do
     {
       'apple' => 60,
@@ -64,7 +64,7 @@ describe 'PATCH #update', type: :request do
   end
 end
 
-describe 'GET#checkout', type: :request do
+RSpec.describe 'GET cart#checkout', type: :request do
   let(:parsed) {JSON.parse(response.body)}
 
   context "when user wants to get checkout" do
