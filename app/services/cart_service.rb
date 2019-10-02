@@ -1,10 +1,24 @@
+# frozen_string_literal: true
+
 class CartService
   def initialize(user)
     @user = user
   end
 
-  def get_coupon(coupon)
+  def duplicated?(coupon)
     @user.coupons.find_by name: coupon
+  end
+
+  def valid?(name)
+    coupons = %w[A FOO C]
+    (coupons.include?name) && !(duplicated? name)
+  end
+
+  def negative_params(cart_params)
+    cart_params.each do |key, _value|
+      cart_params[key] = 0 if cart_params[key].to_i.negative?
+    end
+    cart_params
   end
 
   def build_products_amount
@@ -28,13 +42,12 @@ class CartService
     weight = @user[:apple] + @user[:banana] + @user[:orange]
     return shipping if (subtotal > 400) || weight.zero?
 
-    if weight <= 10
-      shipping = 30
-      return shipping
-    end
-    shipping = 7
-    shipping *= ((weight - 10) / 5)
-    shipping
+    shipping = 30
+    return shipping if weight <= 10
+
+    multiplier = 7
+    multiplier *= ((weight - 10) / 5)
+    shipping + multiplier
   end
 
   def get_coupons_benefits(subtotal, shipping)
@@ -58,8 +71,10 @@ class CartService
   def build_cart_values
     subtotal = subtotal_value
     shipping = shipping_value(subtotal)
-    total, shipping = get_coupons_benefits(subtotal, shipping)
-    values = { subtotal: subtotal, shipping: shipping, total: total }
+    updated = get_coupons_benefits(subtotal, shipping)
+    shipping = updated[1]
+    total = updated[0]
+    { subtotal: subtotal, shipping: shipping, total: total }
   end
 
   def build_checkout
@@ -68,21 +83,6 @@ class CartService
     data = {}
     products.each { |product, amount| data[product] = amount }
     values.each { |type, amount| data[type] = amount }
-    data
-  end
-
-  def calculate_discount(coupon)
-    data = {}
-    data[:coupon] = coupon
-    case coupon[:name]
-    when 'A'
-      data[:discount] = "$ #{-(subtotal_value * 0.3).round(2)}"
-    when 'FOO'
-      data[:discount] = '$ -100'
-    when 'C'
-      data[:discount] = 'Free shipping'
-    end
-    data[:cart] = build_checkout
     data
   end
 end
