@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
 RSpec.describe 'PATCH cart#update', type: :request do
@@ -22,53 +24,63 @@ RSpec.describe 'PATCH cart#update', type: :request do
 
   context 'when user update cart with all products' do
     before do
-      patch '/api/v1/cart', params: { cart: { apple: 3, banana: 1, orange: 4 } }, headers: :headers
+      patch '/api/v1/cart', params: { cart: { apple: 3, banana: 1, orange: 4 } }, headers: headers
     end
 
     it 'returns the actual cart' do
-      expect(:parsed).to equal(:expect_values)
+      expect(parsed).to eq(expect_values)
     end
 
-    it { is_expected.to respond_with_content_type(:json) }
-
-    it { is_expected.to respond_with 200 }
+    it 'returns status code 200' do
+      expect(response).to have_http_status(:success)
+    end
   end
 
   context 'when user update cart with some products' do
-    :expect_values[:apple] = 0
-    :expect_values[:subtotal] = 130
-    :expect_values[:total] = 160
-
     before do
-      patch '/api/v1/cart', params: { cart: { banana: 1, orange: 4 } }, headers: :headers
+      patch '/api/v1/cart', params: { cart: { orange: 5 } }, headers: headers
     end
 
     it 'returns the actual cart' do
-      expect(:parsed).to equal(:expect_values)
+      expect_values[:apple] = 0
+      expect_values[:banana] = 0
+      expect_values[:orange] = 150
+      expect_values[:subtotal] = 150
+      expect_values[:total] = 180
+      expect(parsed).to eq(expect_values)
     end
 
-    it { is_expected.to respond_with 200 }
+    it 'returns status code 200' do
+      expect(response).to have_http_status(:success)
+    end
   end
 
   context 'when user update cart with negative amount' do
-    :expect_values[:apple] = 0
-    :expect_values[:subtotal] = 130
-    :expect_values[:total] = 160
-
     before do
-      patch '/api/v1/cart', params: { cart: { apple: -1, banana: 1, orange: 4 } }, headers: :headers
+      patch '/api/v1/cart', params: { cart: { apple: -1, banana: 1, orange: 4 } }, headers: headers
     end
 
     it 'returns the actual cart' do
-      expect(:parsed).to equal(:expect_values)
+      expect_values[:apple] = 0
+      expect_values[:subtotal] = 130
+      expect_values[:total] = 160
+      expect(parsed).to eq(expect_values)
     end
 
-    it { is_expected.to respond_with 200 }
+    it 'returns status code 200' do
+      expect(response).to have_http_status(:success)
+    end
   end
 end
 
 RSpec.describe 'GET cart#checkout', type: :request do
   let(:parsed) { JSON.parse(response.body) }
+
+  let(:headers) do
+    {
+      'Authorization' => 'teste1'
+    }
+  end
 
   context 'when user wants to get checkout' do
     let(:expect_values) do
@@ -76,24 +88,24 @@ RSpec.describe 'GET cart#checkout', type: :request do
         'apple' => 120,
         'banana' => 60,
         'orange' => 0,
-        'subtotal' => 190,
+        'subtotal' => 180,
         'shipping' => 30,
-        'total' => 220
+        'total' => 210
       }.with_indifferent_access
     end
 
     before do
-      patch '/api/v1/cart', params: { cart: { apple: 6, banana: 6, orange: 0 } }, headers: :headers
+      patch '/api/v1/cart', params: { cart: { apple: 6, banana: 6, orange: 0 } }, headers: headers
       get '/api/v1/cart', headers: headers
     end
 
     it 'returns the actual cart' do
-      expect(:parsed).to equal(:expect_values)
+      expect(parsed).to eq(expect_values)
     end
 
-    it { is_expected.to respond_with_content_type(:json) }
-
-    it { is_expected.to respond_with 200 }
+    it 'returns status code 200' do
+      expect(response).to have_http_status(:success)
+    end
   end
 
   context 'when shipping is free' do
@@ -109,34 +121,34 @@ RSpec.describe 'GET cart#checkout', type: :request do
     end
 
     before do
-      patch '/api/v1/cart', params: { cart: { apple: 21 } }, headers: :headers
+      patch '/api/v1/cart', params: { cart: { apple: 21, banana: 0, orange: 0 } }, headers: headers
       get '/api/v1/cart', headers: headers
     end
 
     it 'returns the actual cart' do
-      expect(:parsed).to equal(:expect_values)
+      expect(parsed).to eq(expect_values)
     end
   end
 
   context 'when weight is bellow or equal 10kg' do
     let(:expect_values) do
       {
-        'apple' => 80,
-        'banana' => 60,
+        'apple' => 120,
+        'banana' => 40,
         'orange' => 0,
-        'subtotal' => 140,
+        'subtotal' => 160,
         'shipping' => 30,
-        'total' => 170
+        'total' => 190
       }.with_indifferent_access
     end
 
     before do
-      patch '/api/v1/cart', params: { cart: { apple: 6, banana: 4 } }, headers: :headers
+      patch '/api/v1/cart', params: { cart: { apple: 6, banana: 4, orange: 0 } }, headers: headers
       get '/api/v1/cart', headers: headers
     end
 
     it 'returns the actual cart' do
-      expect(:parsed).to equal(:expect_values)
+      expect(parsed).to eq(expect_values)
     end
   end
 
@@ -153,12 +165,33 @@ RSpec.describe 'GET cart#checkout', type: :request do
     end
 
     before do
-      patch '/api/v1/cart', params: { cart: { apple: 10, banana: 5 } }, headers: :headers
+      patch '/api/v1/cart', params: { cart: { apple: 10, banana: 5, orange: 0 } }, headers: headers
       get '/api/v1/cart', headers: headers
     end
 
     it 'returns the actual cart' do
-      expect(:parsed).to equal(:expect_values)
+      expect(parsed).to eq(expect_values)
+    end
+  end
+
+  context 'when user have nothing in cart' do
+    let(:expect_values) do
+      {
+        'apple' => 0,
+        'banana' => 0,
+        'orange' => 0,
+        'subtotal' => 0,
+        'shipping' => 0,
+        'total' => 0
+      }.with_indifferent_access
+    end
+
+    before do
+      get '/api/v1/cart', headers: { 'Authorization' => 'teste2' }
+    end
+
+    it 'returns the actual cart' do
+      expect(parsed).to eq(expect_values)
     end
   end
 end
